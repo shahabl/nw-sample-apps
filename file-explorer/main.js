@@ -97,11 +97,51 @@ $(document).ready(function() {
     
   }
   
+  function uploadWithFormData(file) {
+    var options = {
+      url: 'http://httpbin.org/post',
+      bodyType: 'binary',
+    };
+
+   var formData = new window.FormData();
+   var html5FileHandle = new window.File(file, 'test.zip');
+   formData.append('test', html5FileHandle);
+
+    var oldProgress = 0;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', options.url, true);
+    
+    xhr.addEventListener('load', function () {
+      if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
+        alert('upload done');
+      } else {
+        alert('Error: '+xhr.status);
+      }
+    }, false);
+    
+    xhr.addEventListener('error', function (e) {
+      alert('error: '+e.message);
+    }, false);
+    
+    xhr.upload.addEventListener('progress', function (p) {
+      var progress=0;
+      if(p.position && p.total) progress = p.position/p.total;
+      if(progress-oldProgress>0.2) {
+        alert('progress: '+progress);
+        oldProgress=progress;
+      }
+    }, false);
+    
+    xhr.send(html5FileHandle);
+    
+  }
+  
   folder.on('navigate', function(dir, mime) {
     if (mime.type == 'folder') {
       addressbar.enter(mime);
     } else {
       upload(mime.path);
+      //uploadWithFormData(mime.path);
     }
   });
 
